@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "author": "Vishwajeet Tomar",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": -115.2, "left": 225.64, "attrs": {} },
+    {
+      "type": "wokwi-servo",
+      "id": "servo1",
+      "top": -118,
+      "left": -16.4,
+      "rotate": 180,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-servo",
+      "id": "servo2",
+      "top": 6.8,
+      "left": -16.4,
+      "rotate": 180,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-mpu6050",
+      "id": "imu1",
+      "top": -64.22,
+      "left": 434.92,
+      "rotate": 270,
+      "attrs": {}
+    },
+    { "type": "wokwi-vcc", "id": "vcc1", "top": -172.04, "left": 268.8, "attrs": {} },
+    {
+      "type": "wokwi-text",
+      "id": "text1",
+      "top": -57.6,
+      "left": 259.2,
+      "attrs": { "text": "bleh\n" }
+    }
+  ],
+  "connections": [
+    [ "esp:TX", "$serialMonitor:RX", "", [] ],
+    [ "esp:RX", "$serialMonitor:TX", "", [] ],
+    [ "imu1:VCC", "esp:3V3", "red", [ "h0", "v-57.68", "h-230.4", "v38.4" ] ],
+    [ "imu1:GND", "esp:GND.2", "black", [ "h-19.2", "v-28.88" ] ],
+    [ "imu1:SDA", "esp:21", "green", [ "h0" ] ],
+    [ "imu1:SCL", "esp:22", "blue", [ "h-96", "v-19.28", "h-9.6" ] ],
+    [ "servo1:V+", "vcc1:VCC", "red", [ "h19.2", "v-86.5" ] ],
+    [ "servo2:V+", "vcc1:VCC", "red", [ "h19.2", "v-211.3" ] ],
+    [ "servo1:GND", "esp:GND.1", "black", [ "h38.4", "v86.4", "h9.6" ] ],
+    [ "servo2:GND", "esp:GND.1", "black", [ "h38.4", "v-38.4" ] ],
+    [ "servo1:PWM", "esp:14", "orange", [ "h57.6", "v86.2" ] ],
+    [ "servo2:PWM", "esp:12", "orange", [ "h57.6", "v-29" ] ]
+  ],
+  "dependencies": {}
+}

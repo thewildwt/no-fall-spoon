@@ -1,0 +1,4 @@
+libraries used:
+
+ESP32Servo
+MPU6050_light
