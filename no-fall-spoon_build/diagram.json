@@ -35,6 +35,28 @@
       "top": -57.6,
       "left": 259.2,
       "attrs": { "text": "bleh\n" }
+    },
+    {
+      "type": "wokwi-pushbutton-6mm",
+      "id": "btn1",
+      "top": 55.4,
+      "left": 374.4,
+      "attrs": { "color": "green", "xray": "1" }
+    },
+    {
+      "type": "wokwi-text",
+      "id": "text2",
+      "top": 67.2,
+      "left": 422.4,
+      "attrs": { "text": "calibrate" }
+    },
+    {
+      "type": "wokwi-resistor",
+      "id": "r1",
+      "top": 100.8,
+      "left": 316.25,
+      "rotate": 90,
+      "attrs": { "value": "1000" }
     }
   ],
   "connections": [
@@ -49,7 +71,11 @@
     [ "servo1:GND", "esp:GND.1", "black", [ "h38.4", "v86.4", "h9.6" ] ],
     [ "servo2:GND", "esp:GND.1", "black", [ "h38.4", "v-38.4" ] ],
     [ "servo1:PWM", "esp:14", "orange", [ "h57.6", "v86.2" ] ],
-    [ "servo2:PWM", "esp:12", "orange", [ "h57.6", "v-29" ] ]
+    [ "servo2:PWM", "esp:12", "orange", [ "h57.6", "v-29" ] ],
+    [ "btn1:2.r", "esp:GND.3", "black", [ "h10.4", "v-95.6" ] ],
+    [ "esp:16", "btn1:1.l", "violet", [ "h9.6", "v19.2" ] ],
+    [ "esp:3V3", "r1:2", "red", [ "h-278.25", "v240", "h393.6", "v-19.2" ] ],
+    [ "r1:1", "esp:16", "violet", [ "h0", "v-57.6" ] ]
   ],
   "dependencies": {}
 }
