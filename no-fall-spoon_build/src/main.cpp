@@ -8,9 +8,6 @@
 const int servoPins[] = {12 , 14}; //the order matters
 const int button_calibrate = {16};
 
-//addresses
-const int mpuAddress = 0x68;
-
 //definitions
 Servo servo[2];
 Adafruit_MPU6050 mpu;
@@ -93,7 +90,7 @@ void calc_offsets() {
  
   acc.x -= acc_offset.x;
   acc.y -= acc_offset.y;
-  acc.z -= acc_offset.z-1;
+  acc.z -= acc_offset.z-9.81;
 
   gyro.x -= gyro_offset.x;
   gyro.y -= gyro_offset.y;
@@ -160,9 +157,9 @@ void setup() {
     }
   }
 
-  /*mpu.calcOffsets(true,true); // gyro and accelometer
-
-  Wire.beginTransmission(mpuAddress);*/
+  mpu.setAccelerometerRange(MPU6050_RANGE_4_G); // acc sensitivity
+  mpu.setGyroRange(MPU6050_RANGE_250_DEG); // gyro sensitivity
+  mpu.setFilterBandwidth(MPU6050_BAND_21_HZ); //dlpf
 
   //button 
   pinMode(button_calibrate, INPUT_PULLUP);
