@@ -40,6 +40,37 @@ void mpu_readings(){
   gyro.z = mpu.getGyroZ();
 }
 
+void serial_monitor(){
+  
+  Serial.println("Acceleration");
+  Serial.print("X:  ");
+  Serial.print(acc.x);
+  Serial.print("      ");
+  Serial.print("Y:  ");
+  Serial.print(acc.y);
+  Serial.print("      ");
+  Serial.print("Z:  ");
+  Serial.print(acc.z);
+  Serial.println("\n");
+
+  Serial.println("Gyroscope");
+  Serial.print("X:  ");
+  Serial.print(gyro.x);
+  Serial.print("      ");
+  Serial.print("Y:  ");
+  Serial.print(gyro.y);
+  Serial.print("      ");
+  Serial.print("Z:  ");
+  Serial.print(gyro.z);
+  Serial.println("");
+  for(int i=0;i<60;i++){
+    Serial.print("-");
+  }
+  Serial.println("");
+}
+
+
+
 
 // ---------------------setup & loop ---------------------------
 void setup() {
@@ -69,6 +100,8 @@ void setup() {
 
 void loop() {
   mpu_readings();
-  Serial.println(acc.x);
-  delay(15);
+  serial_monitor();
+
+  delay(1000);
+
 }
