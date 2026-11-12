@@ -78,6 +78,11 @@ struct angles_tilt  { //storing final angle values
   float roll;
 } ang;
 
+// servo
+
+
+
+
 //---------------------------------------------------------
 //-------------------functions-----------------------------
 //---------------------------------------------------------
@@ -100,7 +105,8 @@ void mpu_readings(){
 
 //serial monitor for logging and tracking
 void serial_monitor(){
-  
+
+  /*
   Serial.println("Acceleration");
   Serial.print("X:  ");
   Serial.print(acc.x);
@@ -127,6 +133,15 @@ void serial_monitor(){
     Serial.print("-");
   }
   Serial.println("");
+  */
+
+  Serial.print("pitch:  ");
+  Serial.print(atan2(acc.z , acc.x)*180.0/std::numbers::pi);
+  Serial.print("      ");
+  Serial.print("roll:  ");
+  Serial.println(atan2(acc.z , acc.y)*180.0/std::numbers::pi);
+
+
 }
 
 
@@ -195,9 +210,9 @@ void kalman(){
   kalr.P_ba = kalr.F_b * (kalr.P_aa * kalr.F_b.transpose()) + kalr.R_b; //state covariance prediction
 
   //measured values
-  kalp.z_b << atan2(acc.z , acc.x) , gyro.y;
+  kalp.z_b << atan2(acc.z , acc.x)*180.0/std::numbers::pi , gyro.y;
   
-  kalr.z_b << atan2(acc.z , acc.y) , gyro.x;
+  kalr.z_b << atan2(acc.z , acc.y)*180.0/std::numbers::pi , gyro.x;
 
   
   //update
@@ -230,6 +245,10 @@ void kalman(){
 }
 
 void pid(){
+// depreciated for now
+}
+
+void servo_control(){
   
 }
 
@@ -294,4 +313,5 @@ void loop() {
   serial_monitor();
   kalman();
   pid();
+  servo_control();
 }
