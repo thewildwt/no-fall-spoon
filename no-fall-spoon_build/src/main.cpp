@@ -54,22 +54,22 @@ struct kalman { //struct for holding kalman variables
   //-----matrices-----
   
   //state variables X_nm at system time n and no. of observations m
-  MatrixXf X_bb = MatrixXf::Zero(2,1);
-  MatrixXf X_ba = MatrixXf::Zero(2,1);
-  MatrixXf X_aa = MatrixXf::Zero(2,1);
+  MatrixXd X_bb = MatrixXd::Zero(2,1);
+  MatrixXd X_ba = MatrixXd::Zero(2,1);
+  MatrixXd X_aa = MatrixXd::Zero(2,1);
   //state covariance 
-  MatrixXf P_bb = MatrixXf::Zero(2,2);
-  MatrixXf P_ba = MatrixXf::Zero(2,2);
-  MatrixXf P_aa = MatrixXf::Zero(2,2);
+  MatrixXd P_bb = MatrixXd::Zero(2,2);
+  MatrixXd P_ba = MatrixXd::Zero(2,2);
+  MatrixXd P_aa = MatrixXd::Zero(2,2);
 
-  MatrixXf F_b = MatrixXf::Zero(2,2); //state transition matrix
-  MatrixXf Q_b = MatrixXf::Zero(2,2);  //the covariance of the process noise 
-  MatrixXf y_b = MatrixXf::Zero(2,1); // Innovation  residual
-  MatrixXf z_b = MatrixXf::Zero(2,1);  // measured data
-  MatrixXf S_b = MatrixXf::Zero(2,2); //Innovation covariance
-  MatrixXf K_b = MatrixXf::Zero(2,2); //kalman gain
-  MatrixXf R_b = MatrixXf::Zero(2,2); //the covariance of the observation noise
-  MatrixXf I = MatrixXf::Zero(2,2); //identity matrix
+  MatrixXd F_b = MatrixXd::Zero(2,2); //state transition matrix
+  MatrixXd Q_b = MatrixXd::Zero(2,2);  //the covariance of the process noise 
+  MatrixXd y_b = MatrixXd::Zero(2,1); // Innovation  residual
+  MatrixXd z_b = MatrixXd::Zero(2,1);  // measured data
+  MatrixXd S_b = MatrixXd::Zero(2,2); //Innovation covariance
+  MatrixXd K_b = MatrixXd::Zero(2,2); //kalman gain
+  MatrixXd R_b = MatrixXd::Zero(2,2); //the covariance of the observation noise
+  MatrixXd I = MatrixXd::Zero(2,2); //identity matrix
 
 } kalp , kalr;  // kalman pitch and kalman roll
 
@@ -216,17 +216,22 @@ void kalman(){
 
   //time
   kalp.timestop = millis();
-  kalp.seconds = (kalp.timestop - kalp.timestart)/1000 ;
+  kalp.seconds = int(kalp.timestop - kalp.timestart)*0.001;
   
   kalr.timestop = millis();
-  kalr.seconds = (kalr.timestop - kalr.timestart)/1000 ;
+  kalr.seconds = int(kalr.timestop - kalr.timestart)*0.001;
+
 
   //predict
   kalp.X_ba = kalp.F_b * kalp.X_aa; //state variable prediction
-  kalp.P_ba = kalp.F_b * (kalp.P_aa * kalp.F_b.transpose()) + kalp.R_b; //state covariance prediction
+  kalp.P_ba = kalp.F_b * (kalp.P_aa * kalp.F_b.transpose()) + kalp.Q_b; //state covariance prediction
+  Serial.println(kalp.F_b(1,2),4);
+
+
+
 
   kalr.X_ba = kalr.F_b * kalr.X_aa; //state variable prediction
-  kalr.P_ba = kalr.F_b * (kalr.P_aa * kalr.F_b.transpose()) + kalr.R_b; //state covariance prediction
+  kalr.P_ba = kalr.F_b * (kalr.P_aa * kalr.F_b.transpose()) + kalr.Q_b; //state covariance prediction
 
 
   //measured values
@@ -312,7 +317,7 @@ void setup() {
   kalp.I << 1,0,0,1;
   kalp.Q_b << 1,0,0,1;
   kalp.R_b << 1,0,0,1;
-  kalp.Q_b *= 1000;
+  kalp.Q_b *= 100;
   kalp.R_b *= 50;
   kalp.P_aa << 0.001,0.001,0.001,0.001;
 
@@ -337,7 +342,7 @@ void loop() {
   mpu_readings();
   calibrate();
   kalman();
-  serial_monitor();
+  //serial_monitor();
   pid();
   servo_control();
 }
