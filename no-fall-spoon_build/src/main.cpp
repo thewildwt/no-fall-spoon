@@ -39,7 +39,7 @@ long debounceDelay = 50;    // the debounce time; increase if the output flicker
 //offset
 struct acceleration acc_offset;
 struct gyroscope gyro_offset;
-bool offset_state;
+int setup_state = 0;
 
 //kalman 
 
@@ -95,18 +95,19 @@ void mpu_readings(){
   mpu.getEvent(&a, &g, &temp);
   
   acc.x = a.acceleration.x;
-  acc.y = a.acceleration.y;
+  acc.y = a.acceleration.y; 
   acc.z = a.acceleration.z;
 
   gyro.x = g.gyro.x;
   gyro.y = g.gyro.y;
   gyro.z = g.gyro.z;
+
 }
 
 //serial monitor for logging and tracking
 void serial_monitor(){
-
-  /*
+    
+  Serial.print("\033[2J\033[H");
   Serial.println("Acceleration");
   Serial.print("X:  ");
   Serial.print(acc.x);
@@ -133,14 +134,22 @@ void serial_monitor(){
     Serial.print("-");
   }
   Serial.println("");
-  */
-
-  Serial.print("pitch:  ");
-  Serial.print(atan2(acc.z , acc.x)*180.0/std::numbers::pi);
+  
+  Serial.println("accelometer angles:");
+  Serial.print("\npitch:  ");
+  Serial.print(atan2(acc.z , acc.x)*180.0/std::numbers::pi-90);
   Serial.print("      ");
   Serial.print("roll:  ");
-  Serial.println(atan2(acc.z , acc.y)*180.0/std::numbers::pi);
+  Serial.println(atan2(acc.z , acc.y)*180.0/std::numbers::pi-90);
 
+    
+  Serial.println("kalman pitch:");
+  Serial.print("\npitch:  ");
+  Serial.print(ang.pitch);
+  Serial.print("      ");
+  Serial.print("roll:  ");
+  Serial.println(ang.roll);
+  
 
 }
 
@@ -150,15 +159,19 @@ void calc_offsets() {
  
   acc.x -= acc_offset.x;
   acc.y -= acc_offset.y;
-  acc.z -= acc_offset.z-9.81;
+  acc.z -= acc_offset.z-10;
 
   gyro.x -= gyro_offset.x;
   gyro.y -= gyro_offset.y;
   gyro.z -= gyro_offset.z;
+
+  
 }
 
 
 void calibrate(){
+  
+  //button check
   int reading = digitalRead(button_calibrate);
 
   if (reading != lastButtonState) {
@@ -176,16 +189,22 @@ void calibrate(){
       if (buttonState == LOW) {
         acc_offset = acc;
         gyro_offset = gyro;
-        offset_state = true;
       }
     }
   }
 
   lastButtonState = reading;
   
-  if (offset_state == true) {
-    calc_offsets();
-  }
+  if(setup_state < 10){
+    acc_offset = acc;
+    gyro_offset = gyro;
+    setup_state++;
+  } 
+  
+  
+  // the loops calculated offset anyway
+  calc_offsets();
+  
 
 }
 
@@ -209,12 +228,12 @@ void kalman(){
   kalr.X_ba = kalr.F_b * kalr.X_aa; //state variable prediction
   kalr.P_ba = kalr.F_b * (kalr.P_aa * kalr.F_b.transpose()) + kalr.R_b; //state covariance prediction
 
-  //measured values
-  kalp.z_b << atan2(acc.z , acc.x)*180.0/std::numbers::pi , gyro.y;
-  
-  kalr.z_b << atan2(acc.z , acc.y)*180.0/std::numbers::pi , gyro.x;
 
+  //measured values
+  kalp.z_b << atan2(acc.z , acc.x)*180.0/std::numbers::pi-90, gyro.y;
   
+  kalr.z_b << atan2(acc.z , acc.y)*180.0/std::numbers::pi-90 , gyro.x;
+
   //update
   kalp.y_b = kalp.z_b - kalp.X_ba;
   kalp.S_b = kalp.P_ba + kalp.R_b;
@@ -241,7 +260,8 @@ void kalman(){
   kalr.X_aa = kalr.X_bb; 
   kalr.P_aa = kalr.P_bb;
   kalr.timestart = millis();
-
+  //Serial.println(kalp.P_ba(1,1));
+  //Serial.println(kalp.P_bb(1,1));
 }
 
 void pid(){
@@ -262,7 +282,7 @@ void setup() {
   
   //serial monitor
   Serial.begin(115200);
-  Serial.println();
+
 
   
   // attaching servos
@@ -290,19 +310,25 @@ void setup() {
   //kalman
   kalp.F_b << 1 , kalp.seconds , 0 , 1;
   kalp.I << 1,0,0,1;
-  kalp.P_aa << 0,0,0,0;
-  kalp.Q_b << 0,0,0,0;
-  kalp.R_b << 0,0,0,0;
+  kalp.Q_b << 1,0,0,1;
+  kalp.R_b << 1,0,0,1;
+  kalp.Q_b *= 1000;
+  kalp.R_b *= 50;
+  kalp.P_aa << 0.001,0.001,0.001,0.001;
 
   kalr.F_b << 1 , kalr.seconds , 0 , 1;
   kalr.I << 1,0,0,1;
-  kalr.P_aa << 0,0,0,0;
-  kalr.Q_b << 0,0,0,0;
-  kalr.R_b << 0,0,0,0;
+  kalr.Q_b << 1,0,0,1;
+  kalr.R_b << 1,0,0,1;
+  kalr.Q_b *= 100;
+  kalr.R_b *= 100;
+
+
 
   kalp.timestart = millis();
   kalr.timestart = millis();
 
+  
 
 }
 
@@ -310,8 +336,8 @@ void setup() {
 void loop() {
   mpu_readings();
   calibrate();
-  serial_monitor();
   kalman();
+  serial_monitor();
   pid();
   servo_control();
 }
